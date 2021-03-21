@@ -177,11 +177,11 @@ while True:
         ticksNeeded = ticksPerRev * angle / 360
 
         if (angle > 0):
-        pwm2.start(rotSpeed)
-        pwm1.start(0)
+                pwm2.start(rotSpeed)
+                pwm1.start(0)
         elif (angle < 0):
-        pwm1.start(rotSpeed)
-        pwm2.start(0)
+                pwm1.start(rotSpeed)
+                pwm2.start(0)
 
         try:
                 while True:
