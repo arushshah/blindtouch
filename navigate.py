@@ -53,155 +53,150 @@ botCoords = [int(arr[1]), screenResolution[1] - int(arr[2])]
 #botCoords = [716, 1413-1284]
 print(botCoords)
 
-user_choice = getBotPosition.get_user_choice()
-while (user_choice == "Error"):
-    user_choice = getBotPosition.get_user_choice()
 
-user_choice = user_choice.split(",")
-print("User choice: " + str(user_choice))
-sleep(2)
-print(user_choice[0])
-print(user_choice[1])
-print(int(user_choice[0]))
-print(int(user_choice[1]))
-selectionCoords = [int(user_choice[0]), screenResolution[1] - int(user_choice[1])]
+while True:
+        user_choice = "Error"
+        while (user_choice == "Error"):
+                user_choice = getBotPosition.get_user_choice()
 
-distance = math.sqrt((selectionCoords[0] - botCoords[0])**2 + (selectionCoords[1] - botCoords[1])**2)
-# 1st quadrant
-if ((selectionCoords[0] - botCoords[0]) >= 0 and
-    (selectionCoords[1] - botCoords[1]) >= 0):
-    angle = math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) /(abs(selectionCoords[0] - botCoords[0]))))
-# 2nd quadrant
-elif ((selectionCoords[0] - botCoords[0]) < 0 and
-      (selectionCoords[1] - botCoords[1]) >= 0):
-    angle = 180-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
-# 3rd quadrant
-elif (selectionCoords[0] - botCoords[0] < 0 and selectionCoords[1] - botCoords[1] < 0):
-    angle = 180+math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
-# 4th quadrant
-else:
-    angle = 360-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+        user_choice = user_choice.split(",")
+        print("User choice: " + str(user_choice))
+        sleep(2)
+        print(user_choice[0])
+        print(user_choice[1])
+        print(int(user_choice[0]))
+        print(int(user_choice[1]))
+        selectionCoords = [int(user_choice[0]), screenResolution[1] - int(user_choice[1])]
 
-if (angle > 180):
-    angle = -(360-angle)
+        distance = math.sqrt((selectionCoords[0] - botCoords[0])**2 + (selectionCoords[1] - botCoords[1])**2)
+        # 1st quadrant
+        if ((selectionCoords[0] - botCoords[0]) >= 0 and
+        (selectionCoords[1] - botCoords[1]) >= 0):
+        angle = math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) /(abs(selectionCoords[0] - botCoords[0]))))
+        # 2nd quadrant
+        elif ((selectionCoords[0] - botCoords[0]) < 0 and
+        (selectionCoords[1] - botCoords[1]) >= 0):
+        angle = 180-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+        # 3rd quadrant
+        elif (selectionCoords[0] - botCoords[0] < 0 and selectionCoords[1] - botCoords[1] < 0):
+        angle = 180+math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+        # 4th quadrant
+        else:
+        angle = 360-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
 
-print("Angle: " + str(angle))
-print("Distance: " + str(distance))
+        if (angle > 180):
+        angle = -(360-angle)
 
-ticksPerRev = 13500
-ticksNeeded = ticksPerRev * angle / 360
+        print("Angle: " + str(angle))
+        print("Distance: " + str(distance))
 
-counter = 0
-clkLastState = GPIO.input(clkRot)
+        ticksPerRev = 13500
+        ticksNeeded = ticksPerRev * angle / 360
 
-if (angle > 0):
-    pwm1.start(rotSpeed)
-    pwm2.start(0)
-elif (angle < 0):
-    pwm2.start(rotSpeed)
-    pwm1.start(0)
+        counter = 0
+        clkLastState = GPIO.input(clkRot)
 
-try:
-        while True:
-                clkState = GPIO.input(clkRot)
-                if clkState != clkLastState:
-                        dtState = GPIO.input(dtRot)
-                        if dtState != clkState:
-                                counter += 1
-                        else:
-                                counter -= 1
-                clkLastState = clkState
-                if (abs(counter) > abs(ticksNeeded)):
-                        pwm1.start(0)
-                        pwm2.start(0)
-                        break
+        if (angle > 0):
+                pwm1.start(rotSpeed)
+                pwm2.start(0)
+        elif (angle < 0):
+                pwm2.start(rotSpeed)
+                pwm1.start(0)
 
-except:
-    print("Rotation error")
+        try:
+                while True:
+                        clkState = GPIO.input(clkRot)
+                        if clkState != clkLastState:
+                                dtState = GPIO.input(dtRot)
+                                if dtState != clkState:
+                                        counter += 1
+                                else:
+                                        counter -= 1
+                        clkLastState = clkState
+                        if (abs(counter) > abs(ticksNeeded)):
+                                pwm1.start(0)
+                                pwm2.start(0)
+                                break
 
-counter = 0
-clkLastState = GPIO.input(clkExt)
+        except:
+                print("Rotation error")
 
-pwm3.start(50)
-pwm4.start(0)
+        counter = 0
+        clkLastState = GPIO.input(clkExt)
 
-ticksPerCm = 150
-pixelsPerCm = 130
-ticksNeeded = distance/pixelsPerCm * ticksPerCm
-print("Ticks needed: " + str(ticksNeeded))
+        pwm3.start(50)
+        pwm4.start(0)
 
-try:
-        while True:
-                clkState = GPIO.input(clkExt)
-                if clkState != clkLastState:
-                        dtState = GPIO.input(dtExt)
-                        if dtState != clkState:
-                                counter += 1
-                        else:
-                                counter -= 1
-                clkLastState = clkState
-                if (abs(counter) > abs(ticksNeeded)):
-                        pwm3.start(0)
-                        pwm4.start(0)
-                        break
+        ticksPerCm = 150
+        pixelsPerCm = 130
+        ticksNeeded = distance/pixelsPerCm * ticksPerCm
+        print("Ticks needed: " + str(ticksNeeded))
 
+        try:
+                while True:
+                        clkState = GPIO.input(clkExt)
+                        if clkState != clkLastState:
+                                dtState = GPIO.input(dtExt)
+                                if dtState != clkState:
+                                        counter += 1
+                                else:
+                                        counter -= 1
+                        clkLastState = clkState
+                        if (abs(counter) > abs(ticksNeeded)):
+                                pwm3.start(0)
+                                pwm4.start(0)
+                                break
 
+        except:
+                print("Extrusion error")
 
-except:
-    print("Extrusion error")
+        sleep(2)
+        counter = 0
+        ticksNeeded = distance/pixelsPerCm * ticksPerCm
+        pwm4.start(50)
+        pwm3.start(0)
+        try:
+                while True:
+                        clkState = GPIO.input(clkExt)
+                        if clkState != clkLastState:
+                                dtState = GPIO.input(dtExt)
+                                if dtState != clkState:
+                                        counter += 1
+                                else:
+                                        counter -= 1
+                        clkLastState = clkState
+                        if (abs(counter) > abs(ticksNeeded)):
+                                pwm3.start(0)
+                                pwm4.start(0)
+                                break
 
-sleep(2)
-counter = 0
-ticksNeeded = distance/pixelsPerCm * ticksPerCm
-pwm4.start(50)
-pwm3.start(0)
-try:
-        while True:
-                clkState = GPIO.input(clkExt)
-                if clkState != clkLastState:
-                        dtState = GPIO.input(dtExt)
-                        if dtState != clkState:
-                                counter += 1
-                        else:
-                                counter -= 1
-                clkLastState = clkState
-                if (abs(counter) > abs(ticksNeeded)):
-                        pwm3.start(0)
-                        pwm4.start(0)
-                        break
+        except:
+                print("Extrusion 2 error")
 
+        counter = 0
+        ticksNeeded = ticksPerRev * angle / 360
 
+        if (angle > 0):
+        pwm2.start(rotSpeed)
+        pwm1.start(0)
+        elif (angle < 0):
+        pwm1.start(rotSpeed)
+        pwm2.start(0)
 
-except:
-    print("Extrusion 2 error")
+        try:
+                while True:
+                        clkState = GPIO.input(clkRot)
+                        if clkState != clkLastState:
+                                dtState = GPIO.input(dtRot)
+                                if dtState != clkState:
+                                        counter += 1
+                                else:
+                                        counter -= 1
+                        clkLastState = clkState
+                        if (abs(counter) > abs(ticksNeeded)):
+                                pwm1.start(0)
+                                pwm2.start(0)
+                                break
 
-
-counter = 0
-ticksNeeded = ticksPerRev * angle / 360
-
-if (angle > 0):
-    pwm2.start(rotSpeed)
-    pwm1.start(0)
-elif (angle < 0):
-    pwm1.start(rotSpeed)
-    pwm2.start(0)
-
-try:
-        while True:
-                clkState = GPIO.input(clkRot)
-                if clkState != clkLastState:
-                        dtState = GPIO.input(dtRot)
-                        if dtState != clkState:
-                                counter += 1
-                        else:
-                                counter -= 1
-                clkLastState = clkState
-                if (abs(counter) > abs(ticksNeeded)):
-                        pwm1.start(0)
-                        pwm2.start(0)
-                        break
-
-except:
-        print("Rotation error")
-finally:
-    GPIO.cleanup()
+        except:
+                print("Rotation error")
