@@ -72,20 +72,20 @@ while True:
         # 1st quadrant
         if ((selectionCoords[0] - botCoords[0]) >= 0 and
         (selectionCoords[1] - botCoords[1]) >= 0):
-        angle = math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) /(abs(selectionCoords[0] - botCoords[0]))))
+                angle = math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) /(abs(selectionCoords[0] - botCoords[0]))))
         # 2nd quadrant
         elif ((selectionCoords[0] - botCoords[0]) < 0 and
         (selectionCoords[1] - botCoords[1]) >= 0):
-        angle = 180-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+                angle = 180-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
         # 3rd quadrant
         elif (selectionCoords[0] - botCoords[0] < 0 and selectionCoords[1] - botCoords[1] < 0):
-        angle = 180+math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+                angle = 180+math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
         # 4th quadrant
         else:
-        angle = 360-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
+                angle = 360-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
 
         if (angle > 180):
-        angle = -(360-angle)
+                angle = -(360-angle)
 
         print("Angle: " + str(angle))
         print("Distance: " + str(distance))
