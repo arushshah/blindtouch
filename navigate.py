@@ -19,7 +19,8 @@ dtRot = 27
 clkExt = 21
 dtExt = 20
 
-rotSpeed = 12
+rotSpeed = 7
+extSpeed = 40
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -124,7 +125,7 @@ while True:
         counter = 0
         clkLastState = GPIO.input(clkExt)
 
-        pwm3.start(50)
+        pwm3.start(extSpeed)
         pwm4.start(0)
 
         ticksPerCm = 150
