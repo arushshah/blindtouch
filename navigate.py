@@ -5,21 +5,23 @@ from time import sleep
 import math
 import getBotPosition
 
-# rotator
+# rotator pins
 motorPin1 = 19
 motorPin2 = 26
 
-# extruder
+# extruder pins
 motorPin3 = 24
 motorPin4 = 23
 
+# rotator encoder pins
 clkRot = 22
 dtRot = 27
 
+# extruder encoder pins
 clkExt = 21
 dtExt = 20
 
-rotSpeed = 7
+rotSpeed = 12 # range from 0-100
 extSpeed = 40
 
 GPIO.setmode(GPIO.BCM)
@@ -35,21 +37,54 @@ GPIO.setup(dtRot, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(clkExt, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(dtExt, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-# rotator
+# configure pwm for rotator
 pwm1 = GPIO.PWM(motorPin1, 100)
 pwm2 = GPIO.PWM(motorPin2, 100)
 
-# extruder
+# configure pwm for extruder
 pwm3 = GPIO.PWM(motorPin3, 100)
 pwm4 = GPIO.PWM(motorPin4, 100)
 
 
+# code to test rotation motor
+'''
+rotSpeed = 20
+pwm1.start(rotSpeed)
+pwm2.start(0)
+'''
+
+# rotate the other way
+'''
+rotSpeed = 20
+pwm2.start(rotSpeed)
+pwm1.start(0)
+'''
+
+# code to test extrusion motor - extrude out
+'''
+extSpeed = 20
+pwm3.start(extSpeed)
+pwm4.start(0)
+'''
+# code to test extrusion motor - extrude in
+'''
+extSpeed = 20
+pwm4.start(extSpeed)
+pwm3.start(0)
+'''
+
+
 screenResolution = [2048, 1413]
+
+# code starts here - take picture of the screen once device is placed on the display
 getBotPosition.snapshot()
+# send the image to the web server
 getBotPosition.send_file()
+# get the name of the matched template that the web service found
 s = getBotPosition.get_match()
 arr = s.split(",")
 print(arr)
+# get the coordinates that the device is placed on relative to the screen
 botCoords = [int(arr[1]), screenResolution[1] - int(arr[2])]
 #botCoords = [716, 1413-1284]
 print(botCoords)
@@ -57,6 +92,7 @@ print(botCoords)
 
 while True:
         user_choice = "Error"
+        # do nothing until the user makes a selection in the web interface
         while (user_choice == "Error"):
                 user_choice = getBotPosition.get_user_choice()
 
@@ -67,7 +103,11 @@ while True:
         print(user_choice[1])
         print(int(user_choice[0]))
         print(int(user_choice[1]))
+
+        # get the coordinates of the user selection on the touchscreen display
         selectionCoords = [int(user_choice[0]), screenResolution[1] - int(user_choice[1])]
+
+        # calculate the distance and angle from the device coordinates to the user selection coordinates
 
         distance = math.sqrt((selectionCoords[0] - botCoords[0])**2 + (selectionCoords[1] - botCoords[1])**2)
         # 1st quadrant
@@ -85,18 +125,22 @@ while True:
         else:
                 angle = 360-math.degrees(math.atan((abs(selectionCoords[1] - botCoords[1])*1.0) / (abs(selectionCoords[0] - botCoords[0]))))
 
+        # rotate as little as possible, never more than 180 degrees
         if (angle > 180):
                 angle = -(360-angle)
 
         print("Angle: " + str(angle))
         print("Distance: " + str(distance))
 
+        # encoder ticks per revolution
         ticksPerRev = 13500
+        # how many ticks are needed to reach the desired angle
         ticksNeeded = ticksPerRev * angle / 360
 
         counter = 0
         clkLastState = GPIO.input(clkRot)
 
+        # loop to rotate device to desired angle
         if (angle > 0):
                 pwm1.start(rotSpeed)
                 pwm2.start(0)
@@ -125,7 +169,8 @@ while True:
         counter = 0
         clkLastState = GPIO.input(clkExt)
 
-        pwm3.start(extSpeed)
+        # loop to extrude tape to desired distance
+        pwm3.start(50)
         pwm4.start(0)
 
         ticksPerCm = 150
@@ -152,6 +197,8 @@ while True:
                 print("Extrusion error")
 
         sleep(2)
+
+        # loop to retract the tape back into the device
         counter = 0
         ticksNeeded = distance/pixelsPerCm * ticksPerCm
         pwm4.start(50)
@@ -174,6 +221,8 @@ while True:
         except:
                 print("Extrusion 2 error")
 
+
+        # loop to reset angle of the device to home position
         counter = 0
         ticksNeeded = ticksPerRev * angle / 360
 
