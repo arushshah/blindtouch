@@ -22,6 +22,7 @@ clkExt = 21
 dtExt = 20
 
 rotSpeed = 12 # range from 0-100
+extSpeed = 40
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
